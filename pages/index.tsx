@@ -18,15 +18,18 @@ type Operation = {
 	leftSide: string;
 	rightSide: string;
 	operator: string;
+	result: string;
 };
 
 export default function Home() {
+	const [submitted, setSubmitted] = useState(false);
 	const [displayCurrent, setDisplayCurrent] = useState('');
 	const [displayPrev, setDisplayPrev] = useState('');
 	const [operation, setOperation] = useState<Operation>({
 		leftSide: '',
 		rightSide: '',
 		operator: '',
+		result: '',
 	});
 
 	const handleBeautifyDisplay = () => {
@@ -35,21 +38,18 @@ export default function Home() {
 			return;
 		}
 
-		if (operation.operator) {
+		if (operation.operator !== '') {
 			setDisplayCurrent(Number(operation.rightSide).toLocaleString('en-US'));
-			if (operation.rightSide !== '') {
-				if (operation.rightSide.endsWith('.')) {
-					setDisplayPrev(
-						Number(operation.leftSide).toLocaleString('en-US') +
-							'.' +
-							operation.operator
-					);
-				} else {
-					setDisplayPrev(
-						Number(operation.leftSide).toLocaleString('en-US') +
-							operation.operator
-					);
-				}
+			if (!submitted) {
+				setDisplayPrev(
+					Number(operation.leftSide).toLocaleString('en-US') +
+						operation.operator
+				);
+			}
+			if (operation.rightSide.endsWith('.')) {
+				setDisplayCurrent(
+					Number(operation.rightSide).toLocaleString('en-US') + '.'
+				);
 			}
 		} else {
 			if (operation.leftSide.endsWith('.')) {
@@ -80,6 +80,7 @@ export default function Home() {
 					leftSide: prev.leftSide + input,
 					rightSide: '',
 					operator: '',
+					result: '',
 				};
 			}
 		});
@@ -93,6 +94,7 @@ export default function Home() {
 				leftSide: '',
 				rightSide: '',
 				operator: '',
+				result: '',
 			});
 		} else if (input === '←') {
 			setOperation((prev) => {
@@ -146,7 +148,15 @@ export default function Home() {
 	};
 
 	const handleOperationalInput = (input: string) => {
-		
+		if (operation.rightSide !== '' && input !== '=') {
+			// first do the request to the server and then update the left side with the result operator with the input and right side with empty string
+		} else if (operation.rightSide === '' && input === '=') {
+			return;
+		} else if (operation.rightSide !== '' && input === '=') {
+			// submit the request
+		} else {
+			handleOperationUpdate(input);
+		}
 	};
 
 	const handleNumberInput = (input: string) => {
@@ -190,7 +200,7 @@ export default function Home() {
 						<ThemeChange />
 						<div className='w-full h-2/6 flex flex-col items-end justify-center gap-16'>
 							<div className='dark:text-white/40 text-black/40 w-full font-light text-right'>
-								prev
+								{displayPrev ? displayPrev : '0'}
 							</div>
 							<div className='w-full text-right text-6xl'>
 								{displayCurrent ? displayCurrent : '0'}
