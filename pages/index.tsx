@@ -21,6 +21,7 @@ type Operation = {
 	result: string;
 };
 
+
 export default function Home() {
 	const [submitted, setSubmitted] = useState(false);
 	const [displayCurrent, setDisplayCurrent] = useState('');
@@ -31,6 +32,14 @@ export default function Home() {
 		operator: '',
 		result: '',
 	});
+
+	const submitOperation = async () => {
+		const res = await fetch('/api/calculate', {
+			method: 'POST',
+			body: JSON.stringify(operation),
+		});
+		const data = await res.json();
+	};
 
 	const handleBeautifyDisplay = () => {
 		if (operation.leftSide === '' && operation.rightSide === '') {
@@ -204,6 +213,7 @@ export default function Home() {
 							</div>
 							<div className='w-full text-right text-6xl'>
 								{displayCurrent ? displayCurrent : '0'}
+								{data ? data : ''}
 							</div>
 						</div>
 						<div className='grid grid-cols-4 w-full place-items-center h-3/5'>
