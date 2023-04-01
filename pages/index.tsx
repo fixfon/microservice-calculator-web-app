@@ -21,7 +21,6 @@ type Operation = {
 	result: string;
 };
 
-
 export default function Home() {
 	const [submitted, setSubmitted] = useState(false);
 	const [displayCurrent, setDisplayCurrent] = useState('');
@@ -213,7 +212,6 @@ export default function Home() {
 							</div>
 							<div className='w-full text-right text-6xl'>
 								{displayCurrent ? displayCurrent : '0'}
-								{data ? data : ''}
 							</div>
 						</div>
 						<div className='grid grid-cols-4 w-full place-items-center h-3/5'>
