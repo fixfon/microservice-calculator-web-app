@@ -1,13 +1,12 @@
-## Getting Started
+# Microservice Based Calculator Application
 
-First, run the development server:
+This is a simple calculator application that is built using microservices architecture. Every service in the application is built on different programming languages. The services deployed on Dapr with proper Docker files.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Services
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- [Frontend](/frontend/)
+- [Addition](/backend/addition-service/)
+- [Subtraction](/backend/substraction-service/)
+- [Multiplication](/backend/multiplication-service/)
+- [Division](/backend/division-service/)
+- [Percenatge](/backend/percentage-service/)
