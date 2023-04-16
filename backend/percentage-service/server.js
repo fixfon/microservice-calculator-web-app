@@ -7,10 +7,22 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/percentage', (req, res) => {
-	const { percentage } = req.body;
 	//calculate percentage
-	const result = percentage * 0.01;
-	res.json({ result });
+	const operation = req.body;
+
+	if (operation.rightSide === '100') {
+		const result = Number(operation.leftSide) * 0.01;
+
+		operation.result = result.toString();
+	} else {
+		const result =
+			(Number(operation.leftSide) * Number(operation.rightSide)) / 100;
+
+		operation.result = result.toString();
+	}
+	console.log(operation);
+
+	res.json(operation);
 });
 
 app.listen(3001, () => {
