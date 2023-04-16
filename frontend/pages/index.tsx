@@ -10,8 +10,8 @@ const work_sans = Work_Sans({
 	subsets: ['latin'],
 });
 
-const Operator = ['÷', 'x', '-', '+', '%', '='];
-const Functional = ['.', 'C', '±', '←'];
+const Operator = ['÷', 'x', '-', '+', '='];
+const Functional = ['.', 'C', '±', '←', '%'];
 const Numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 type Operation = {
@@ -32,12 +32,23 @@ export default function Home() {
 		result: '',
 	});
 
+	const handleResult = (operationRes: Operation) => {
+		setOperation(() => {
+			return {
+				...operationRes,
+			};
+		});
+		setSubmitted(false);
+	};
+
 	const submitOperation = async () => {
 		const res = await fetch('/api/calculate', {
 			method: 'POST',
 			body: JSON.stringify(operation),
 		});
-		const data = await res.json();
+		const operationRes = await res.json();
+
+		handleResult(operationRes);
 	};
 
 	const handleBeautifyDisplay = () => {
@@ -47,17 +58,31 @@ export default function Home() {
 		}
 
 		if (operation.operator !== '') {
-			setDisplayCurrent(Number(operation.rightSide).toLocaleString('en-US'));
-			if (!submitted) {
+			if (operation.result !== '') {
+				setDisplayCurrent(Number(operation.result).toLocaleString('en-US'));
 				setDisplayPrev(
 					Number(operation.leftSide).toLocaleString('en-US') +
-						operation.operator
+						operation.operator +
+						Number(operation.rightSide).toLocaleString('en-US')
 				);
-			}
-			if (operation.rightSide.endsWith('.')) {
-				setDisplayCurrent(
-					Number(operation.rightSide).toLocaleString('en-US') + '.'
-				);
+				if (operation.result.endsWith('.')) {
+					setDisplayCurrent(
+						Number(operation.result).toLocaleString('en-US') + '.'
+					);
+				}
+			} else {
+				setDisplayCurrent(Number(operation.rightSide).toLocaleString('en-US'));
+				if (!submitted) {
+					setDisplayPrev(
+						Number(operation.leftSide).toLocaleString('en-US') +
+							operation.operator
+					);
+				}
+				if (operation.rightSide.endsWith('.')) {
+					setDisplayCurrent(
+						Number(operation.rightSide).toLocaleString('en-US') + '.'
+					);
+				}
 			}
 		} else {
 			if (operation.leftSide.endsWith('.')) {
@@ -152,10 +177,33 @@ export default function Home() {
 					};
 				}
 			});
+		} else if (input === '%') {
+			if (operation.rightSide === '') {
+				// calculate the left side with respect to the 100 (left side / 100) set the left side with the result
+				setOperation((prev) => {
+					return {
+						...prev,
+						operator: '%',
+						rightSide: '100',
+					};
+				});
+
+				setSubmitted(true);
+			} else {
+				// calculation logic (left side * right side / 100) set the left side with the result
+				setOperation((prev) => {
+					return {
+						...prev,
+						operator: '%',
+					};
+				});
+
+				setSubmitted(true);
+			}
 		}
 	};
 
-	const handleOperationalInput = (input: string) => {
+	const handleOperatorInput = (input: string) => {
 		if (operation.rightSide !== '' && input !== '=') {
 			// first do the request to the server and then update the left side with the result operator with the input and right side with empty string
 		} else if (operation.rightSide === '' && input === '=') {
@@ -175,8 +223,19 @@ export default function Home() {
 
 	const checkInput = (input: string) => {
 		console.log(input);
+		if (operation.result !== '') {
+			setOperation(() => {
+				return {
+					leftSide: '',
+					rightSide: '',
+					operator: '',
+					result: '',
+				};
+			});
+		}
+
 		if (Operator.includes(input)) {
-			handleOperationalInput(input);
+			handleOperatorInput(input);
 		} else if (Functional.includes(input)) {
 			handleFunctionalInput(input);
 		} else if (Numbers.includes(input)) {
@@ -193,6 +252,12 @@ export default function Home() {
 		console.log(operation);
 		handleBeautifyDisplay();
 	}, [operation]);
+
+	useEffect(() => {
+		if (submitted) {
+			submitOperation();
+		}
+	}, [submitted]);
 
 	return (
 		<>
