@@ -8,14 +8,32 @@ type Data = {
 	result: string;
 };
 
+const OperatorServiceMap = {
+	'+': 'add',
+	'-': 'subtract',
+	x: 'multiply',
+	'÷': 'divide',
+	'%': 'percentage',
+};
+
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<Data>
 ) {
-	console.log('api request:', req.body);
+	console.log('hit api request:', req.body);
 	const { leftSide, rightSide, operator, result } = JSON.parse(req.body);
 
-	const percentageRes = await fetch('http://localhost:3001/percentage', {
+	if (!leftSide || !rightSide || !operator) {
+		res.status(400);
+		return;
+	}
+
+	const operatorMap =
+		OperatorServiceMap[operator as keyof typeof OperatorServiceMap];
+	const daprPort = process.env.DAPR_HTTP_PORT ?? 3500;
+	const daprUrl = `http://localhost:${daprPort}/v1.0/invoke/${operatorMap}/method/${operatorMap}`;
+
+	const percentageRes = await fetch(daprUrl, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
