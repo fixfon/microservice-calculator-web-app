@@ -6,6 +6,7 @@ services:
       - '3000:3000'
     depends_on:
       - placement
+      - redis
 
   frontend-dapr:
     image: 'daprio/daprd:edge'
@@ -18,7 +19,11 @@ services:
         '3000',
         '-placement-host-address',
         'placement:50006',
+        '-components-path',
+        '/components',
       ]
+    volumes:
+      - './components/:/components'
     depends_on:
       - frontend
     network_mode: 'service:frontend'
@@ -30,6 +35,7 @@ services:
       - '3001:3001'
     depends_on:
       - placement
+      - redis
 
   percentage-dapr:
     image: 'daprio/daprd:edge'
@@ -42,7 +48,11 @@ services:
         '3001',
         '-placement-host-address',
         'placement:50006',
+        '-components-path',
+        '/components',
       ]
+    volumes:
+      - './components/:/components'
     depends_on:
       - percentage
     network_mode: 'service:percentage'
@@ -52,3 +62,8 @@ services:
     command: ['./placement', '-port', '50006']
     ports:
       - '50006:50006'
+
+  redis:
+    image: 'redis'
+    ports:
+      - '6379:6379'

@@ -9,7 +9,7 @@ app.use(express.json());
 
 app.post('/percentage', (req, res) => {
 	//calculate percentage
-	console.log('hit percentage service', req);
+	// console.log('hit percentage service', req);
 	const operation = req.body;
 
 	if (operation.rightSide === '100') {

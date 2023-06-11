@@ -33,6 +33,12 @@ export default async function handler(
 	const daprPort = process.env.DAPR_HTTP_PORT ?? 3500;
 	const daprUrl = `http://localhost:${daprPort}/v1.0/invoke/${operatorMap}/method/${operatorMap}`;
 
+	const stateStoreName = `statestore`;
+	const stateUrl = `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`;
+
+	const clientAddress =
+		req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
 	const percentageRes = await fetch(daprUrl, {
 		method: 'POST',
 		headers: {
@@ -53,5 +59,34 @@ export default async function handler(
 	const operationResult = {
 		...percentage,
 	};
+
+	// save or update latest operation of the client on state store
+	console.log('stateUrl:', stateUrl);
+	await fetch(stateUrl, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify([
+			{
+				key: clientAddress,
+				value: operationResult,
+			},
+		]),
+	}).then((res) => {
+		if (!res.ok) {
+			console.log('is not ok');
+		}
+
+		console.log('is ok');
+	});
+
+	// get state from state store
+	const stateRes = await fetch(`${stateUrl}/${clientAddress}`);
+
+	// get the state value
+	const state = await stateRes.json();
+	console.log('state:', state);
+
 	res.status(200).json(operationResult);
 }
