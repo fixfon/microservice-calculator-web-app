@@ -1,5 +1,6 @@
 services:
   frontend:
+    image: frontend:v1
     build:
       context: ./frontend
     ports:
@@ -29,13 +30,13 @@ services:
     network_mode: 'service:frontend'
 
   percentage:
+    image: percentage:v1
     build:
       context: ./backend/percentage-service
-    ports:
-      - '3001:3001'
+    expose:
+      - '3001'
     depends_on:
       - placement
-      - redis
 
   percentage-dapr:
     image: 'daprio/daprd:edge'
@@ -67,3 +68,8 @@ services:
     image: 'redis'
     ports:
       - '6379:6379'
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:
