@@ -36,9 +36,6 @@ export default async function handler(
 	const stateStoreName = `statestore`;
 	const stateUrl = `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`;
 
-	const clientAddress =
-		req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
 	const percentageRes = await fetch(daprUrl, {
 		method: 'POST',
 		headers: {
@@ -61,6 +58,9 @@ export default async function handler(
 	};
 
 	// save or update latest operation of the client on state store
+	const clientAddress =
+		req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
 	console.log('stateUrl:', stateUrl);
 	await fetch(stateUrl, {
 		method: 'POST',

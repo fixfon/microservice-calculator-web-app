@@ -3,7 +3,7 @@ import { Work_Sans } from 'next/font/google';
 import ThemeChange from '@/components/ThemeChange';
 import UnionIcon from '@/components/UnionIcon';
 import BackIcon from '@/components/BackIcon';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const work_sans = Work_Sans({
 	weight: ['300', '400', '500', '700'],
@@ -41,7 +41,7 @@ export default function Home() {
 		setSubmitted(false);
 	};
 
-	const submitOperation = async () => {
+	const submitOperation = useCallback(async () => {
 		const res = await fetch('/api/calculate', {
 			method: 'POST',
 			body: JSON.stringify(operation),
@@ -49,10 +49,11 @@ export default function Home() {
 		const operationRes = await res.json();
 
 		handleResult(operationRes);
-	};
+	}, [operation]);
 
-	const handleBeautifyDisplay = () => {
+	const handleBeautifyDisplay = useCallback(() => {
 		if (operation.leftSide === '' && operation.rightSide === '') {
+			setDisplayPrev('');
 			setDisplayCurrent('');
 			return;
 		}
@@ -93,7 +94,13 @@ export default function Home() {
 				setDisplayCurrent(Number(operation.leftSide).toLocaleString('en-US'));
 			}
 		}
-	};
+	}, [
+		operation.leftSide,
+		operation.operator,
+		operation.result,
+		operation.rightSide,
+		submitted,
+	]);
 
 	const handleOperationUpdate = (input: string) => {
 		setOperation((prev) => {
@@ -222,9 +229,8 @@ export default function Home() {
 	};
 
 	const checkInput = (input: string) => {
-		console.log(input);
 		if (operation.result !== '') {
-			setOperation(() => {
+			return setOperation(() => {
 				return {
 					leftSide: '',
 					rightSide: '',
@@ -249,15 +255,14 @@ export default function Home() {
 	};
 
 	useEffect(() => {
-		console.log(operation);
 		handleBeautifyDisplay();
-	}, [operation]);
+	}, [operation, handleBeautifyDisplay]);
 
 	useEffect(() => {
 		if (submitted) {
 			submitOperation();
 		}
-	}, [submitted]);
+	}, [submitted, submitOperation]);
 
 	return (
 		<>
